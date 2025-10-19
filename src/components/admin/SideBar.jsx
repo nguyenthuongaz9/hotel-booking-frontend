@@ -15,6 +15,7 @@ const SideBar = () => {
         { name: 'Dashboard', path: '/owner', icon: <HiHome className="text-xl" /> },
         { name: 'Add Room', path: '/owner/add-room', icon: <HiPlusCircle className="text-xl" /> },
         { name: 'List Room', path: '/owner/list-room', icon: <HiViewList className="text-xl" /> },
+        { name: 'Orders', path: '/owner/order', icon: <HiViewList className="text-xl" /> },
     ];
 
     return (

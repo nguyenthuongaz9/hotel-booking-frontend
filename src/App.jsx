@@ -9,7 +9,7 @@ import Layout from "./pages/HotelOwner/Layout"
 import ListRoom from "./pages/HotelOwner/ListRoom"
 import MyBooking from "./pages/MyBooking"
 import RoomDetail from "./pages/RoomDetail"
-
+import Order from "./pages/Order"
 function App() {
   const isOwnerPath = useLocation().pathname.includes('owner')
   return (
@@ -28,6 +28,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="add-room" element={<AddRoom />} />
             <Route path="list-room" element={<ListRoom />} />
+            <Route path="order" element={<Order />} />
           </Route>
         </Routes>
       </div>
