@@ -7,5 +7,9 @@ export default defineConfig({
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg'],
   build: {
     assetsInlineLimit: 0
+  },
+  server: {
+    port: 3000
   }
+
 })

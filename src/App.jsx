@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom"
+import { Route, Router, Routes, useLocation } from "react-router-dom"
 import HotelReg from "./components/admin/HotelReg"
 import Navbar from "./components/Navbar"
 import AllRooms from "./pages/AllRooms"
@@ -10,6 +10,10 @@ import ListRoom from "./pages/HotelOwner/ListRoom"
 import MyBooking from "./pages/MyBooking"
 import RoomDetail from "./pages/RoomDetail"
 import Order from "./pages/Order"
+import { Login } from "./pages/Login"
+import SignUpPage from "./pages/SignUp"
+import { AuthProvider } from "./context/AuthProvider"
+import { ProtectedRoute } from "./components/auth/ProtectedRoute"
 function App() {
   const isOwnerPath = useLocation().pathname.includes('owner')
   return (
@@ -17,20 +21,24 @@ function App() {
       {!isOwnerPath && <Navbar />}
       {false && <HotelReg />}
       <div className="min-h-[70vh]">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/rooms" element={<AllRooms />} />
-          <Route path="/rooms/:id" element={<RoomDetail />} />
-          <Route path="/my-bookings" element={<MyBooking />} />
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/rooms" element={<AllRooms />} />
+            <Route path="/rooms/:id" element={<RoomDetail />} />
 
-          {/*  */}
-          <Route path="/owner" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="add-room" element={<AddRoom />} />
-            <Route path="list-room" element={<ListRoom />} />
-            <Route path="order" element={<Order />} />
-          </Route>
-        </Routes>
+            <Route path="/my-bookings" element={<ProtectedRoute><MyBooking /> </ProtectedRoute>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            {/*  */}
+            <Route path="/owner" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="add-room" element={<AddRoom />} />
+              <Route path="list-room" element={<ListRoom />} />
+              <Route path="order" element={<Order />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
       </div>
       {/* footer*/}
     </div>
