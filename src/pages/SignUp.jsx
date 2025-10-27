@@ -1,9 +1,10 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const signUpSchema = z
   .object({
@@ -13,9 +14,7 @@ const signUpSchema = z
       .string()
       .regex(/^[0-9]{9,11}$/, "Phone number must be 9–11 digits"),
     address: z.string().min(5, "Address is too short"),
-    cccd: z
-      .string()
-      .regex(/^[0-9]{9,12}$/, "CCCD/ID must be 9–12 digits"),
+    cccd: z.string().regex(/^[0-9]{9,12}$/, "CCCD/ID must be 9–12 digits"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
   })
@@ -33,9 +32,22 @@ export default function SignUpPage() {
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = (data) => {
-    console.log("✅ Form Data:", data);
-    alert("Sign up successfully!");
+  const { register: authRegister, user } = useAuth();
+
+  const navigate = useNavigate();
+
+  if (user) {
+    navigate("/");
+  }
+  const onSubmit = async (data) => {
+    try {
+      console.log(" Form Data:", data);
+      await authRegister(data);
+      alert("Sign up successfully!");
+    } catch (error) {
+      console.error("Sign up failed:", error);
+      alert(`Sign up failed: ${error.message}`);
+    }
   };
 
   return (
@@ -44,7 +56,9 @@ export default function SignUpPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="w-[32rem] bg-gray-900/80 border border-gray-700 shadow-2xl rounded-2xl p-8 flex flex-col items-center backdrop-blur-sm"
       >
-        <h2 className="text-3xl font-bold text-white mb-4">Create Account ✨</h2>
+        <h2 className="text-3xl font-bold text-white mb-4">
+          Create Account ✨
+        </h2>
         <p className="text-gray-400 text-sm mb-8">
           Fill in your information to sign up
         </p>
@@ -70,7 +84,9 @@ export default function SignUpPage() {
               className="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
             />
             {errors.email && (
-              <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-red-400 text-sm mt-1">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
@@ -82,7 +98,9 @@ export default function SignUpPage() {
               className="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
             />
             {errors.phone && (
-              <p className="text-red-400 text-sm mt-1">{errors.phone.message}</p>
+              <p className="text-red-400 text-sm mt-1">
+                {errors.phone.message}
+              </p>
             )}
           </div>
 
@@ -158,4 +176,3 @@ export default function SignUpPage() {
     </div>
   );
 }
-

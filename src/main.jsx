@@ -1,20 +1,35 @@
-import { ClerkProvider } from '@clerk/clerk-react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App.jsx'
-import './index.css'
-// Import your Publishable Key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App.jsx";
+import "./index.css";
+import { Toaster } from "react-hot-toast";
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Add your Clerk Publishable Key to the .env file')
-}
-
-createRoot(document.getElementById('root')).render(
-  <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </ClerkProvider>
-
-)
+createRoot(document.getElementById("root")).render(
+  <BrowserRouter>
+    <App />
+    <Toaster
+      position="top-center"
+      toastOptions={{
+        duration: 4000,
+        style: {
+          background: "#000",
+          color: "#fff",
+        },
+        success: {
+          duration: 3000,
+          theme: {
+            primary: "green",
+            secondary: "black",
+          },
+        },
+        error: {
+          duration: 5000,
+          style: {
+            background: "#ef4444",
+            color: "#fff",
+          },
+        },
+      }}
+    />
+  </BrowserRouter>,
+);
