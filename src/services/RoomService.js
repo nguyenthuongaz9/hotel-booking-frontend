@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import axiosInstance from "../api/config/axiosInstance.js";
 export const roomService = {
   createRoom: async (roomData, imageFiles) => {
     try {
@@ -16,13 +14,11 @@ export const roomService = {
         });
       }
 
-      console.log("API Base URL:", API_BASE_URL);
-
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
       }
 
-      const response = await axios.post(`${API_BASE_URL}/rooms`, formData, {
+      const response = await axiosInstance.post(`/rooms`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -68,10 +64,9 @@ export const roomService = {
         queryParams.append("sort", `${backendSortField},${sortDirection}`);
       }
 
-      const url = `${API_BASE_URL}/rooms?${queryParams.toString()}`;
-      console.log("Fetching rooms from:", url);
-
-      const response = await axios.get(url);
+      const response = await axiosInstance.get(
+        `/rooms?${queryParams.toString()}`,
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching rooms:", error);
@@ -80,10 +75,7 @@ export const roomService = {
   },
   getRoomById: async (id) => {
     try {
-      const url = `${API_BASE_URL}/rooms/${id}`;
-      console.log("Fetching room from:", url);
-
-      const response = await axios.get(url);
+      const response = await axiosInstance.get(`/rooms/${id}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching room:", error);

@@ -1,12 +1,10 @@
-const API_URL = `${import.meta.env.VITE_API_BASE_URL}/payment`;
-import axios from "axios";
-
+import axiosInstance from "../api/config/axiosInstance";
 export const paymentService = {
   async createPayment(amount, orderId, currency = "usd") {
     try {
       console.log("Sending payment request:", { amount, orderId, currency });
 
-      const response = await axios.post(`${API_URL}/create`, {
+      const response = await axiosInstance.post(`/payment/create`, {
         amount: amount,
         orderId: orderId,
         currency: currency,
@@ -28,8 +26,8 @@ export const paymentService = {
 
   async confirmPayment(paymentIntentId) {
     try {
-      const response = await axios.post(
-        `${API_URL}/confirm/${paymentIntentId}`,
+      const response = await axiosInstance.post(
+        `/payment/confirm/${paymentIntentId}`,
       );
       return response.data;
     } catch (error) {
@@ -39,7 +37,7 @@ export const paymentService = {
 
   async getPaymentStatus(orderId) {
     try {
-      const response = await axios.get(`${API_URL}/status/${orderId}`);
+      const response = await axiosInstance.get(`/payment/status/${orderId}`);
       return response.data;
     } catch (error) {
       throw new Error("Failed to get payment status: " + error.message);
@@ -48,7 +46,7 @@ export const paymentService = {
 
   async handleWebhook(payload) {
     try {
-      const response = await axios.post(`${API_URL}/webhook`, payload);
+      const response = await axiosInstance.post(`/payment/webhook`, payload);
       return response.data;
     } catch (error) {
       throw new Error("Failed to handle webhook: " + error.message);
@@ -57,7 +55,7 @@ export const paymentService = {
 
   async createMomoPayment(amount, orderId, orderInfo = "") {
     try {
-      const response = await axios.post(`${API_URL}/momo/create`, {
+      const response = await axiosInstance.post(`/payment/momo/create`, {
         amount: amount,
         orderId: orderId,
         orderInfo: orderInfo || `Payment for order #${orderId}`,

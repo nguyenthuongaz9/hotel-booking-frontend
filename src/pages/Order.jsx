@@ -40,6 +40,7 @@ const Order = () => {
 
       if (selectedStatus === "ALL") {
         response = await orderService.getAllOrders(currentPage - 1, pageSize);
+        console.log(response);
       } else {
         response = await orderService.getOrdersByStatus(
           selectedStatus,
@@ -48,8 +49,8 @@ const Order = () => {
         );
       }
 
-      setOrders(response.content || response);
-      setFilteredOrders(response.content || response);
+      setOrders(response.orders || response);
+      setFilteredOrders(response.orders || response);
       setTotalPages(response.totalPages || 1);
       setTotalOrders(response.totalElements || response.length);
     } catch (error) {
@@ -369,20 +370,20 @@ const Order = () => {
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {order.userName}
+                              {order?.user?.name}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {order.userEmail}
+                              {order?.user?.email}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {order.hotelName}
+                          {order?.room?.roomNumber}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Phòng {order.roomNumber} - {order.roomType}
+                          Phòng {order?.room?.roomNumber} - {order?.room?.type}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -524,13 +525,13 @@ const Order = () => {
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Họ tên:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {selectedOrder.userName}
+                      {selectedOrder?.user?.name}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Email:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {selectedOrder.userEmail}
+                      {selectedOrder?.user?.email}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -553,25 +554,25 @@ const Order = () => {
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Khách sạn:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {selectedOrder.hotelName}
+                      Hoa mai
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Số phòng:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {selectedOrder.roomNumber}
+                      {selectedOrder?.room?.roomNumber}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Loại phòng:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {selectedOrder.roomType}
+                      {selectedOrder?.room?.type}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">ID phòng:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      #{selectedOrder.roomId}
+                      #{selectedOrder?.roomId}
                     </span>
                   </div>
                 </div>
@@ -638,6 +639,15 @@ const Order = () => {
                     </span>
                     <span className="font-bold text-blue-600">
                       {formatPrice(selectedOrder.totalPrice)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-lg">
+                    <span className="font-semibold text-gray-900">
+                      Trạng thái:
+                    </span>
+                    <span className="font-bold text-blue-600">
+                      {selectedOrder.paymentStatus}
                     </span>
                   </div>
                 </div>

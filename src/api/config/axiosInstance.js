@@ -1,28 +1,34 @@
 import axios from "axios";
+import keycloakService from "../../services/KeyCloakService";
 
 const API_BASE_URL = "http://localhost:8900/api";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log(` Adding token to request: ${token.substring(0, 20)}...`);
+  async (config) => {
+    const publicEndpoints = ["/auth/login", "/auth/register", "/public"];
+    if (publicEndpoints.some((endpoint) => config.url?.includes(endpoint))) {
+      return config;
     }
 
-    console.log(
-      `Making ${config.method?.toUpperCase()} request to:`,
-      config.url,
-    );
-    console.log(" Request data:", config.data);
+    try {
+      const token = await keycloakService.getClientToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log(
+          `✅ Token added to request: ${config.method?.toUpperCase()} ${config.url}`,
+        );
+      }
+    } catch (error) {
+      console.error("❌ Failed to get token for request:", error);
+    }
 
     return config;
   },
@@ -34,63 +40,31 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log(" Response received:", response.status, response.data);
+    console.log(`✅ Response ${response.status}: ${response.config.url}`);
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    console.error(" Response error:");
-    console.error("Status:", error.response?.status);
-    console.error("URL:", originalRequest?.url);
-    console.error("Method:", originalRequest?.method);
-    console.error("Error data:", error.response?.data);
+    console.error("❌ API Error:", {
+      status: error.response?.status,
+      url: originalRequest?.url,
+      method: originalRequest?.method,
+      error: error.response?.data,
+    });
 
-    if (
-      error.response?.status === 401 &&
-      originalRequest &&
-      !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/login") &&
-      !originalRequest.url?.includes("/auth/register")
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      console.log("🔄 Token expired, attempting refresh...");
+      keycloakService.clearToken();
+
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        console.log(" Attempting token refresh...");
-
-        if (refreshToken) {
-          const response = await axios.post(
-            `${API_BASE_URL}/auth/refresh`,
-            {
-              refreshToken,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
-
-          const newToken = response.data.accessToken;
-          localStorage.setItem("accessToken", newToken);
-          console.log("🔄 New token stored");
-
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return axiosInstance(originalRequest);
-        } else {
-          console.log(" No refresh token available");
-          throw new Error("No refresh token");
-        }
+        await keycloakService.getClientToken();
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error(" Token refresh failed:", refreshError);
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-        if (!window.location.pathname.includes("/login")) {
-          window.location.href = "/login";
-        }
-        return Promise.reject(refreshError);
+        console.error("❌ Token refresh failed:", refreshError);
+        window.location.href = "/login";
       }
     }
 

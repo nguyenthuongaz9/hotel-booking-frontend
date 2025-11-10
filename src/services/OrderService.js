@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import axiosInstance from "../api/config/axiosInstance";
 
 const getUserIdFromStorage = () => {
   try {
@@ -46,16 +44,12 @@ const orderService = {
 
       console.log("Order payload to backend:", orderPayload);
 
-      const response = await axios.post(
-        `${API_BASE_URL}/orders`,
-        orderPayload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+      const response = await axiosInstance.post(`/orders`, orderPayload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+      });
 
       console.log("Order created successfully:", response.data);
       return response.data;
@@ -82,8 +76,8 @@ const orderService = {
     try {
       console.log("Cancelling order:", orderId);
 
-      const response = await axios.post(
-        `${API_BASE_URL}/orders/${orderId}/cancel`,
+      const response = await axiosInstance.post(
+        `/orders/${orderId}/cancel`,
         {},
         {
           headers: {
@@ -118,8 +112,8 @@ const orderService = {
     try {
       console.log("Creating payment session for order:", orderId);
 
-      const response = await axios.post(
-        `${API_BASE_URL}/orders/${orderId}/payment`,
+      const response = await axiosInstance.post(
+        `/orders/${orderId}/payment`,
         {
           successUrl: successUrl || `${window.location.origin}/payment/success`,
           cancelUrl: cancelUrl || `${window.location.origin}/payment/cancel`,
@@ -168,7 +162,7 @@ const orderService = {
 
   getOrderById: async (orderId) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/orders/${orderId}`, {
+      const response = await axiosInstance.get(`/orders/${orderId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -182,14 +176,11 @@ const orderService = {
 
   getOrderByIdWithRoom: async (orderId) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/orders/${orderId}/with-room`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+      const response = await axiosInstance.get(`/orders/${orderId}/with-room`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+      });
       return response.data;
     } catch (error) {
       console.error("Error fetching order with room details:", error);
@@ -199,8 +190,8 @@ const orderService = {
 
   getUserOrders: async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/orders/user/${getUserIdFromStorage()}/with-rooms`,
+      const response = await axiosInstance.get(
+        `/orders/user/${getUserIdFromStorage()}/with-rooms`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -217,8 +208,8 @@ const orderService = {
 
   getUserOrdersSync: async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/orders/user/${getUserIdFromStorage()}/with-rooms-sync`,
+      const response = await axiosInstance.get(
+        `/orders/user/${getUserIdFromStorage()}/with-rooms-sync`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -236,8 +227,8 @@ const orderService = {
     try {
       console.log("Updating order status:", orderId, status);
 
-      const response = await axios.patch(
-        `${API_BASE_URL}/orders/${orderId}/status`,
+      const response = await axiosInstance.patch(
+        `/orders/${orderId}/status`,
         { status },
         {
           headers: {
@@ -272,9 +263,9 @@ const orderService = {
     try {
       console.log("Updating payment status:", orderId, paymentStatus);
 
-      const response = await axios.patch(
-        `${API_BASE_URL}/orders/${orderId}/payment-status`,
-        { paymentStatus },
+      const response = await axiosInstance.patch(
+        `/orders/${orderId}/payment-status`,
+        { status: paymentStatus },
         {
           headers: {
             "Content-Type": "application/json",
@@ -308,7 +299,7 @@ const orderService = {
     try {
       console.log("Deleting order:", orderId);
 
-      const response = await axios.delete(`${API_BASE_URL}/orders/${orderId}`, {
+      const response = await axiosInstance.delete(`/orders/${orderId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -339,7 +330,7 @@ const orderService = {
     try {
       console.log("Checking room availability:", roomId, checkIn, checkOut);
 
-      const response = await axios.get(`${API_BASE_URL}/orders/availability`, {
+      const response = await axiosInstance.get(`/orders/availability`, {
         params: {
           roomId,
           checkIn,
@@ -373,7 +364,7 @@ const orderService = {
 
   getAllOrders: async (page = 0, size = 10) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/orders`, {
+      const response = await axiosInstance.get(`/orders`, {
         params: {
           page,
           size,
@@ -388,14 +379,11 @@ const orderService = {
 
   getOrdersByStatus: async (status) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/orders/status/${status}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+      const response = await axiosInstance.get(`/orders/status/${status}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+      });
       return response.data;
     } catch (error) {
       console.error("Error fetching orders by status:", error);
@@ -405,8 +393,8 @@ const orderService = {
 
   getOrdersByPaymentStatus: async (paymentStatus) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/orders/payment-status/${paymentStatus}`,
+      const response = await axiosInstance.get(
+        `/orders/payment-status/${paymentStatus}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

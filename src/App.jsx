@@ -38,11 +38,46 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUpPage />} />
             {/*  */}
-            <Route path="/owner" element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="add-room" element={<AddRoom />} />
-              <Route path="list-room" element={<ListRoom />} />
-              <Route path="order" element={<Order />} />
+            <Route
+              path="/owner"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route
+                index
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />{" "}
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="add-room"
+                element={
+                  <ProtectedRoute>
+                    <AddRoom />{" "}
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="list-room"
+                element={
+                  <ProtectedRoute>
+                    <ListRoom />{" "}
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="order"
+                element={
+                  <ProtectedRoute>
+                    <Order />{" "}
+                  </ProtectedRoute>
+                }
+              />
             </Route>
           </Routes>
         </div>

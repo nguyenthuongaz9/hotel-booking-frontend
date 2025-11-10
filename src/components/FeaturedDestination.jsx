@@ -14,16 +14,13 @@ const FeaturedDestination = () => {
     const fetchFeaturedRooms = async () => {
       try {
         setLoading(true);
-        // Lấy 4 phòng đầu tiên với các tham số phù hợp
         const params = {
           page: 0,
           size: 4,
-          // Có thể thêm các tham số khác nếu muốn filter featured rooms
-          // ví dụ: isFeatured: true nếu API hỗ trợ
         };
 
         const response = await roomService.getRooms(params);
-        setRooms(response.content || response.data || response); // Tuỳ thuộc vào cấu trúc response của API
+        setRooms(response.content || response.data || response);
       } catch (err) {
         console.error("Error fetching featured rooms:", err);
         setError("Failed to load featured destinations");
@@ -62,8 +59,6 @@ const FeaturedDestination = () => {
       </div>
     );
   }
-
-  console.log(rooms[0].images[0].image);
 
   return (
     <div className="container-fluid mx-auto px-4 py-16">
