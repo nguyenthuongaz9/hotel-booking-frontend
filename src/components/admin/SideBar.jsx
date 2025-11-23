@@ -22,6 +22,11 @@ const SideBar = () => {
       path: "/owner/order",
       icon: <HiViewList className="text-xl" />,
     },
+    {
+      name: "User",
+      path: "/owner/user",
+      icon: <HiViewList className="text-xl" />,
+    },
   ];
 
   return (

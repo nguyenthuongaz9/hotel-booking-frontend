@@ -14,6 +14,7 @@ import { Login } from "./pages/Login";
 import SignUpPage from "./pages/SignUp";
 import { AuthProvider } from "./context/AuthProvider";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import UserManagement from "../src/pages/HotelOwner/UserManagement";
 function App() {
   const isOwnerPath = useLocation().pathname.includes("owner");
   return (
@@ -75,6 +76,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Order />{" "}
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="user"
+                element={
+                  <ProtectedRoute>
+                    <UserManagement />{" "}
                   </ProtectedRoute>
                 }
               />
