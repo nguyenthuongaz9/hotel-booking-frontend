@@ -36,7 +36,6 @@ const AddRoom = () => {
     "POOL_ACCESS",
   ];
 
-  // Handle image change
   const handleImageChange = (key, file) => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
@@ -45,7 +44,6 @@ const AddRoom = () => {
     }
   };
 
-  // Handle input change
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     setInputs({
@@ -54,7 +52,6 @@ const AddRoom = () => {
     });
   };
 
-  // Handle amenities change
   const handleAmenityChange = (amenity) => {
     setInputs((prev) => ({
       ...prev,
@@ -64,7 +61,6 @@ const AddRoom = () => {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -132,7 +128,6 @@ const AddRoom = () => {
   return (
     <div className="max-w-7xl mx-auto p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-xl">
       <form className="space-y-8" onSubmit={handleSubmit}>
-        {/* Title Section */}
         <div>
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
             Add New Room
@@ -143,7 +138,6 @@ const AddRoom = () => {
           </p>
         </div>
 
-        {/* Hiển thị message */}
         {message.text && (
           <div
             className={`p-4 rounded-lg ${
@@ -156,7 +150,6 @@ const AddRoom = () => {
           </div>
         )}
 
-        {/* Images Section */}
         <div>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Room Images
@@ -203,7 +196,6 @@ const AddRoom = () => {
           </div>
         </div>
 
-        {/* Room Details Section */}
         <div>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Room Details
@@ -246,9 +238,8 @@ const AddRoom = () => {
                   <option value="">Select Room Type</option>
                   <option value="SINGLE">Single Room</option>
                   <option value="DOUBLE">Double Room</option>
-                  <option value="DELUXE">Deluxe Room</option>
                   <option value="SUITE">Suite</option>
-                  <option value="PRESIDENTIAL">Presidential Suite</option>
+                  <option value="FAMILY">Family</option>
                 </select>
                 <svg
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
@@ -361,7 +352,6 @@ const AddRoom = () => {
           </div>
         </div>
 
-        {/* Amenities Section */}
         <div>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Amenities
@@ -389,7 +379,6 @@ const AddRoom = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="flex justify-end">
           <button
             type="submit"

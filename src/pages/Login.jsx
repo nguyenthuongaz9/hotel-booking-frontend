@@ -27,8 +27,10 @@ export const Login = () => {
 
   const { login, user } = useAuth();
 
-  if (user) {
+  if (user && user?.role !== "ADMIN") {
     navigate("/");
+  } if (user && user?.role === "ADMIN") {
+    navigate("/owner");
   }
 
   const onSubmit = async (data) => {

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Eye, Edit, Trash2, User, Mail, Phone, Calendar, Shield, ChevronDown, Plus, X, Check, Clock } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Eye, Edit, Trash2, User, Mail, Phone, Calendar, Shield, ChevronDown, Plus, X, Check, Clock, Building } from 'lucide-react';
+import { userService } from '../../services/UserService';
+import toast from 'react-hot-toast';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -12,150 +14,186 @@ const UserManagement = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [pagination, setPagination] = useState({
+        page: 0,
+        size: 10,
+        totalPages: 0,
+        totalElements: 0
+    });
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [pagination.page, pagination.size]);
 
     const fetchUsers = async () => {
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            const mockUsers = [
-                {
-                    id: 1,
-                    full_name: "Nguyễn Văn A",
-                    email: "nguyenvana@email.com",
-                    phone: "0912345678",
-                    role: "customer",
-                    created_at: "2024-01-15T10:30:00",
-                    updated_at: "2024-01-15T10:30:00"
-                },
-                {
-                    id: 2,
-                    full_name: "Trần Thị B",
-                    email: "tranthib@email.com",
-                    phone: "0923456789",
-                    role: "admin",
-                    created_at: "2024-01-16T11:00:00",
-                    updated_at: "2024-01-20T14:30:00"
-                },
-                {
-                    id: 3,
-                    full_name: "Lê Văn C",
-                    email: "levanc@email.com",
-                    phone: "0934567890",
-                    role: "customer",
-                    created_at: "2024-01-17T12:00:00",
-                    updated_at: "2024-01-17T12:00:00"
-                },
-                {
-                    id: 4,
-                    full_name: "Phạm Thị D",
-                    email: "phamthid@email.com",
-                    phone: "0945678901",
-                    role: "customer",
-                    created_at: "2024-01-18T13:00:00",
-                    updated_at: "2024-01-25T09:15:00"
-                },
-                {
-                    id: 5,
-                    full_name: "Hoàng Văn E",
-                    email: "hoangvane@email.com",
-                    phone: "0956789012",
-                    role: "admin",
-                    created_at: "2024-01-19T14:00:00",
-                    updated_at: "2024-01-22T16:45:00"
-                },
-                {
-                    id: 6,
-                    full_name: "Vũ Thị F",
-                    email: "vuthif@email.com",
-                    phone: "0967890123",
-                    role: "customer",
-                    created_at: "2024-01-20T15:00:00",
-                    updated_at: "2024-01-20T15:00:00"
-                }
-            ];
-            setUsers(mockUsers);
-            setFilteredUsers(mockUsers);
+        try {
+            const response = await userService.getAllUsers(
+                pagination.page, 
+                pagination.size, 
+                'createdAt', 
+                'desc', 
+                searchTerm
+            );
+            
+            console.log('API Response:', response);
+            
+            if (response && response.content) {
+                const formattedUsers = response.content.map(user => ({
+                    id: user.id,
+                    full_name: user.name || user.fullName || 'Chưa có tên',
+                    email: user.email,
+                    phone: user.phone || 'Chưa có số điện thoại',
+                    role: user.role?.toLowerCase() || 'customer',
+                    created_at: user.createdAt || user.createdDate || new Date().toISOString(),
+                    updated_at: user.updatedAt || user.modifiedDate || new Date().toISOString()
+                }));
+                
+                console.log('Formatted users:', formattedUsers);
+                
+                setUsers(formattedUsers);
+                setFilteredUsers(formattedUsers);
+                
+                setPagination(prev => ({
+                    ...prev,
+                    totalPages: response.totalPages || 0,
+                    totalElements: response.totalElements || 0
+                }));
+            } else {
+                console.log('No content in response');
+                setUsers([]);
+                setFilteredUsers([]);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            setUsers([]);
+            setFilteredUsers([]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
+
+    const filterUsers = useCallback(() => {
+        console.log('=== FILTER FUNCTION CALLED ===');
+        console.log('Current users:', users.length);
+        console.log('Selected role:', selectedRole);
+        
+        if (!users || users.length === 0) {
+            console.log('No users available for filtering');
+            setFilteredUsers([]);
+            return;
+        }
+
+        let result;
+        if (selectedRole === 'ALL') {
+            result = [...users];
+            console.log('Showing ALL users:', result.length);
+        } else {
+            result = users.filter(user => user.role === selectedRole);
+            console.log(`Filtered by ${selectedRole}:`, result.length);
+        }
+        
+        setFilteredUsers(result);
+    }, [users, selectedRole]);
 
     useEffect(() => {
+        console.log('=== FILTER EFFECT TRIGGERED ===');
+        console.log('Users length:', users.length, 'Selected role:', selectedRole);
         filterUsers();
-    }, [selectedRole, searchTerm, users]);
+    }, [selectedRole, filterUsers]);
 
-    const filterUsers = () => {
-        let filtered = users;
-
-        // Filter by role
-        if (selectedRole !== 'ALL') {
-            filtered = filtered.filter(user => user.role === selectedRole);
+    useEffect(() => {
+        console.log('=== USERS CHANGED EFFECT ===');
+        console.log('New users length:', users.length);
+        if (users.length > 0) {
+            filterUsers();
         }
+    }, [users, filterUsers]);
 
-        // Filter by search term
-        if (searchTerm) {
-            filtered = filtered.filter(user =>
-                user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.phone.includes(searchTerm) ||
-                user.id.toString().includes(searchTerm)
-            );
-        }
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (searchTerm !== '') {
+                setPagination(prev => ({ ...prev, page: 0 }));
+                fetchUsers();
+            } else {
+                setPagination(prev => ({ ...prev, page: 0 }));
+                fetchUsers();
+            }
+        }, 500);
 
-        setFilteredUsers(filtered);
-    };
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
 
     const deleteUser = async (userId) => {
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setUsers(users.filter(user => user.id !== userId));
-            setIsLoading(false);
+        try {
+            await userService.deleteUser(userId);
+            await fetchUsers();
+            toast.success('Delete user successfully');
             setShowDeleteModal(false);
             setSelectedUser(null);
-        }, 500);
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            toast.error('Lỗi khi xóa người dùng: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const updateUser = async (userData) => {
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            const updatedUsers = users.map(user =>
-                user.id === userData.id
-                    ? { ...user, ...userData, updated_at: new Date().toISOString() }
-                    : user
-            );
-            setUsers(updatedUsers);
-            setIsLoading(false);
+        try {
+            const apiData = {
+                name: userData.full_name,
+                phone: userData.phone,
+                role: userData.role.toUpperCase()
+            };
+
+            await userService.updateUserAdmin(userData.id, apiData);
+            
+            toast.success('Update user successfully');
+            await fetchUsers();
             setShowEditModal(false);
             setEditingUser(null);
-        }, 500);
+
+        } catch (error) {
+            console.error('Error updating user:', error);
+            toast.error('Lỗi khi cập nhật người dùng: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const createUser = async (userData) => {
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            const newUser = {
-                ...userData,
-                id: Math.max(...users.map(u => u.id)) + 1,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+        try {
+            const apiData = {
+                name: userData.full_name,
+                email: userData.email,
+                phone: userData.phone,
+                role: userData.role.toUpperCase(),
+                password: userData.password
             };
-            setUsers([...users, newUser]);
-            setIsLoading(false);
+
+            await userService.registerUser(apiData);
+            
+            await fetchUsers();
             setShowEditModal(false);
             setEditingUser(null);
-        }, 500);
+        } catch (error) {
+            console.error('Error creating user:', error);
+            alert('Lỗi khi tạo người dùng: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const getRoleColor = (role) => {
         const colors = {
             admin: 'bg-purple-100 text-purple-800 border-purple-200',
-            customer: 'bg-blue-100 text-blue-800 border-blue-200'
+            customer: 'bg-blue-100 text-blue-800 border-blue-200',
+            user: 'bg-blue-100 text-blue-800 border-blue-200',
+            hotel_manager: 'bg-orange-100 text-orange-800 border-orange-200'
         };
         return colors[role] || 'bg-gray-100 text-gray-800 border-gray-200';
     };
@@ -163,38 +201,51 @@ const UserManagement = () => {
     const getRoleIcon = (role) => {
         const icons = {
             admin: <Shield className="w-4 h-4" />,
-            customer: <User className="w-4 h-4" />
+            customer: <User className="w-4 h-4" />,
+            user: <User className="w-4 h-4" />,
+            hotel_manager: <Building className="w-4 h-4" />
         };
-        return icons[role];
+        return icons[role] || <User className="w-4 h-4" />;
     };
 
     const getRoleText = (role) => {
         const texts = {
             admin: 'Quản trị viên',
-            customer: 'Khách hàng'
+            customer: 'Khách hàng',
+            user: 'Người dùng',
+            hotel_manager: 'Quản lý khách sạn'
         };
-        return texts[role];
+        return texts[role] || role;
     };
 
     const formatDateTime = (dateString) => {
-        return new Date(dateString).toLocaleString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        try {
+            return new Date(dateString).toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'Invalid date';
+        }
     };
 
     const stats = {
         total: users.length,
         admin: users.filter(u => u.role === 'admin').length,
-        customer: users.filter(u => u.role === 'customer').length,
+        customer: users.filter(u => u.role === 'customer' || u.role === 'user').length,
+        hotel_manager: users.filter(u => u.role === 'hotel_manager').length,
         recent: users.filter(u => {
-            const userDate = new Date(u.created_at);
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            return userDate > weekAgo;
+            try {
+                const userDate = new Date(u.created_at);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return userDate > weekAgo;
+            } catch (error) {
+                return false;
+            }
         }).length
     };
 
@@ -217,32 +268,38 @@ const UserManagement = () => {
             userData.id = editingUser.id;
             updateUser(userData);
         } else {
+            userData.password = formData.get('password');
             createUser(userData);
         }
     };
 
+    const handlePageChange = (newPage) => {
+        setPagination(prev => ({
+            ...prev,
+            page: newPage
+        }));
+    };
+
+    console.log('=== RENDER STATE ===');
+    console.log('Users:', users.length);
+    console.log('Filtered Users:', filteredUsers.length);
+    console.log('Selected Role:', selectedRole);
+    console.log('Stats:', stats);
+
     return (
         <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="mb-6 lg:mb-8">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                         <div className="mb-4 lg:mb-0">
                             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Quản lý người dùng</h1>
                             <p className="text-gray-600">Quản lý và theo dõi tất cả người dùng trong hệ thống</p>
                         </div>
-                        <button
-                            onClick={() => openEditModal()}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors w-full lg:w-auto justify-center"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Thêm người dùng
-                        </button>
+                       
                     </div>
                 </div>
 
-                {/* Statistics Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 mb-6">
                     <div className="bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 border-gray-400">
                         <div className="flex items-center justify-between">
                             <div>
@@ -273,6 +330,16 @@ const UserManagement = () => {
                         </div>
                     </div>
 
+                    <div className="bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 border-orange-400">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs lg:text-sm text-gray-600 mb-1">Quản lý KS</p>
+                                <p className="text-lg lg:text-2xl font-bold text-orange-600">{stats.hotel_manager}</p>
+                            </div>
+                            <Building className="w-6 h-6 lg:w-8 lg:h-8 text-orange-400" />
+                        </div>
+                    </div>
+
                     <div className="bg-white rounded-lg shadow p-4 lg:p-6 border-l-4 border-green-400">
                         <div className="flex items-center justify-between">
                             <div>
@@ -284,10 +351,8 @@ const UserManagement = () => {
                     </div>
                 </div>
 
-                {/* Filters and Search */}
                 <div className="bg-white rounded-lg shadow p-4 lg:p-6 mb-6">
                     <div className="flex flex-col lg:flex-row gap-4">
-                        {/* Search */}
                         <div className="flex-1">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 lg:w-5 lg:h-5" />
@@ -301,9 +366,8 @@ const UserManagement = () => {
                             </div>
                         </div>
 
-                        {/* Role Filter */}
                         <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
-                            {['ALL', 'admin', 'customer'].map(role => (
+                            {['ALL', 'admin', 'customer', 'user', 'hotel_manager'].map(role => (
                                 <button
                                     key={role}
                                     onClick={() => setSelectedRole(role)}
@@ -319,7 +383,6 @@ const UserManagement = () => {
                     </div>
                 </div>
 
-                {/* Users Table */}
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-32 lg:h-64">
@@ -328,7 +391,17 @@ const UserManagement = () => {
                     ) : filteredUsers.length === 0 ? (
                         <div className="text-center py-8 lg:py-12">
                             <User className="w-12 h-12 lg:w-16 lg:h-16 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500 text-sm lg:text-lg">Không tìm thấy người dùng nào</p>
+                            <p className="text-gray-500 text-sm lg:text-lg">
+                                {users.length === 0 ? 'Không có người dùng nào' : 'Không tìm thấy người dùng phù hợp với bộ lọc'}
+                            </p>
+                            {users.length > 0 && (
+                                <button
+                                    onClick={() => setSelectedRole('ALL')}
+                                    className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    Hiển thị tất cả người dùng
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -421,6 +494,38 @@ const UserManagement = () => {
                             </table>
                         </div>
                     )}
+
+                    {pagination.totalPages > 1 && (
+                        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                            <div className="flex-1 flex justify-between items-center">
+                                <div>
+                                    <p className="text-sm text-gray-700">
+                                        Hiển thị <span className="font-medium">{(pagination.page * pagination.size) + 1}</span> đến{' '}
+                                        <span className="font-medium">
+                                            {Math.min((pagination.page + 1) * pagination.size, pagination.totalElements)}
+                                        </span> trong{' '}
+                                        <span className="font-medium">{pagination.totalElements}</span> kết quả
+                                    </p>
+                                </div>
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={() => handlePageChange(pagination.page - 1)}
+                                        disabled={pagination.page === 0}
+                                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Previous
+                                    </button>
+                                    <button
+                                        onClick={() => handlePageChange(pagination.page + 1)}
+                                        disabled={pagination.page >= pagination.totalPages - 1}
+                                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -442,7 +547,6 @@ const UserManagement = () => {
                         </div>
 
                         <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
-                            {/* User Avatar and Basic Info */}
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-blue-100 flex items-center justify-center">
                                     <User className="w-8 h-8 lg:w-10 lg:h-10 text-blue-600" />
@@ -457,7 +561,6 @@ const UserManagement = () => {
                                 </div>
                             </div>
 
-                            {/* Contact Info */}
                             <div className="space-y-3">
                                 <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                                     <Mail className="w-4 h-4" />
@@ -479,7 +582,6 @@ const UserManagement = () => {
                                 </div>
                             </div>
 
-                            {/* Timeline Info */}
                             <div className="space-y-3">
                                 <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                                     <Calendar className="w-4 h-4" />
@@ -501,7 +603,6 @@ const UserManagement = () => {
                 </div>
             )}
 
-            {/* Edit/Create User Modal */}
             {showEditModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -607,7 +708,6 @@ const UserManagement = () => {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {showDeleteModal && selectedUser && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-md w-full p-6">
@@ -644,6 +744,7 @@ const UserManagement = () => {
                     </div>
                 </div>
             )}
+            
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import roomImg1 from "../assets/roomImg1.png";
 import roomImg2 from "../assets/roomImg2.png";
 import roomImg3 from "../assets/roomImg3.png";
@@ -12,6 +13,7 @@ const MyBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const defaultImages = [roomImg1, roomImg2, roomImg3, roomImg4];
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -151,6 +153,19 @@ const MyBooking = () => {
         toast.error("Failed to cancel booking. Please try again.");
       }
     }
+  };
+
+  const handleReview = (booking) => {
+    // Điều hướng đến trang đánh giá với thông tin booking
+    navigate(`/review/${booking._id}`, {
+      state: {
+        roomId: booking.room?.id,
+        roomName: booking.name,
+        bookingId: booking._id,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut
+      }
+    });
   };
 
   useEffect(() => {
@@ -429,14 +444,12 @@ const MyBooking = () => {
                             booking.originalPaymentStatus === "UNPAID") &&
                             booking.status !== "Cancelled" &&
                             booking.originalStatus !== "CANCELLED" && (
-                              <>
-                                <button
-                                  onClick={() => handlePayment(booking)}
-                                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
-                                >
-                                  Thanh toán
-                                </button>{" "}
-                              </>
+                              <button
+                                onClick={() => handlePayment(booking)}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                              >
+                                Thanh toán
+                              </button>
                             )}
 
                           {(booking.payment === "Paid" ||
@@ -462,9 +475,12 @@ const MyBooking = () => {
 
                           {(booking.status === "Completed" ||
                             booking.originalStatus === "COMPLETED") && (
-                            <div className="flex-1 text-center py-3 px-6 bg-green-100 text-green-700 rounded-xl font-semibold">
-                              Hoàn thành
-                            </div>
+                            <button
+                              onClick={() => handleReview(booking)}
+                              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                            >
+                              Đánh giá
+                            </button>
                           )}
                         </div>
                       </div>

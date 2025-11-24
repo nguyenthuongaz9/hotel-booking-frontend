@@ -15,7 +15,6 @@ const Testimonial = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/rooms/featured-reviews`);
-      conole.log(response);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

@@ -82,6 +82,38 @@ export const roomService = {
       throw error;
     }
   },
+  updateRoom: async (id, roomData) => {
+    try{
+      const response = await axiosInstance.patch(`/rooms/${id}`, roomData);
+      return response.data;
+
+
+    } catch(error){
+      console.error("Error updating room:", error);
+      throw error;
+    }
+  },
+  addImagesToRoom: async (roomId, images)=>  {
+    const formData = new FormData();
+    images.forEach(file => {
+      formData.append('images', file);
+    });
+
+    const response = await axiosInstance.post(`/rooms/${roomId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteImage: async(roomId, imageId) => {
+    const response = await api.delete(`/rooms/${roomId}/images/${imageId}`);
+    console.log(response)
+    return response.data;
+  }
+
+  
 };
 
 function mapSortFieldToBackend(frontendField) {

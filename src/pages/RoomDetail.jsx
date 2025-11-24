@@ -39,54 +39,67 @@ const RoomDetail = () => {
   const [orderId, setOrderId] = useState(null);
 
   const amenitiesIcons = {
-    "Free WiFi": <FaWifi />,
-    "Breakfast Included": <FaCoffee />,
-    "Ocean View": <FaSwimmingPool />,
-    "King Bed": <FaBed />,
-    "Free Parking": <FaParking />,
-    "Pet Friendly": <FaDog />,
-    Fireplace: <FaFire />,
-    "Mountain View": <FaMountain />,
-    "Private Pool": <FaSwimmingPool />,
-    "Beach Access": <FaUtensils />,
-    "BBQ Area": <FaUtensils />,
-    "Gym Access": <FaCity />,
-    "City View": <FaCity />,
-    Kitchenette: <FaUtensils />,
+    "FREE_WIFI": <FaWifi />,
+    "BREAKFAST_INCLUDED": <FaCoffee />,
+    "OCEAN_VIEW": <FaSwimmingPool />,
+    "KING_BED": <FaBed />,
+    "FREE_PARKING": <FaParking />,
+    "PET_FRIENDLY": <FaDog />,
+    "FIREPLACE": <FaFire />,
+    "MOUNTAIN_VIEW": <FaMountain />,
+    "PRIVATE_POOL": <FaSwimmingPool />,
+    "BEACH_ACCESS": <FaUtensils />,
+    "BBQ_AREA": <FaUtensils />,
+    "GYM_ACCESS": <FaCity />,
+    "CITY_VIEW": <FaCity />,
+    "KITCHENETTE": <FaUtensils />,
+  };
+
+  const amenitiesLabels = {
+    "FREE_WIFI": "Free WiFi",
+    "BREAKFAST_INCLUDED": "Breakfast Included",
+    "OCEAN_VIEW": "Ocean View",
+    "KING_BED": "King Bed",
+    "FREE_PARKING": "Free Parking",
+    "PET_FRIENDLY": "Pet Friendly",
+    "FIREPLACE": "Fireplace",
+    "MOUNTAIN_VIEW": "Mountain View",
+    "PRIVATE_POOL": "Private Pool",
+    "BEACH_ACCESS": "Beach Access",
+    "BBQ_AREA": "BBQ Area",
+    "GYM_ACCESS": "Gym Access",
+    "CITY_VIEW": "City View",
+    "KITCHENETTE": "Kitchenette",
+  };
+
+  const roomTypeLabels = {
+    "SINGLE": "Single Room",
+    "DOUBLE": "Double Room",
+    "SUITE": "Suite Room",
+    "DELUXE": "Deluxe Room",
+    "FAMILY": "Family Room"
   };
 
   const defaultImages = [roomImg1, roomImg2, roomImg3, roomImg4];
 
   const mapRoomData = (apiRoom) => {
-    const roomImages =
-      apiRoom.images && apiRoom.images.length > 0
-        ? apiRoom.images.map((img) => {
-            const imageUrl = `${import.meta.env.VITE_API_IMAGE_UPLOADS}/${img.image}`;
-            return imageUrl;
-          })
-        : defaultImages;
+    console.log("Raw API room data:", apiRoom);
 
-    const mappedAmenities = apiRoom.amenities
-      ? apiRoom.amenities.map((amenity) => {
-          const amenityMap = {
-            FREE_WIFI: "Free WiFi",
-            BREAKFAST_INCLUDED: "Breakfast Included",
-            OCEAN_VIEW: "Ocean View",
-            KING_BED: "King Bed",
-            FREE_PARKING: "Free Parking",
-            PET_FRIENDLY: "Pet Friendly",
-            FIREPLACE: "Fireplace",
-            MOUNTAIN_VIEW: "Mountain View",
-            PRIVATE_POOL: "Private Pool",
-            BEACH_ACCESS: "Beach Access",
-            BBQ_AREA: "BBQ Area",
-            GYM_ACCESS: "Gym Access",
-            CITY_VIEW: "City View",
-            KITCHENETTE: "Kitchenette",
-          };
-          return amenityMap[amenity] || amenity;
+    // Xử lý images
+    const roomImages = apiRoom.images && apiRoom.images.length > 0
+      ? apiRoom.images.map((img) => {
+          const imageUrl = img.image 
+            ? `${import.meta.env.VITE_API_IMAGE_UPLOADS}/${img.image}`
+            : defaultImages[0];
+          return imageUrl;
         })
-      : ["Free WiFi", "Breakfast Included"];
+      : defaultImages;
+
+    // Xử lý room type
+    const roomType = apiRoom.type ? roomTypeLabels[apiRoom.type] || apiRoom.type : "Standard Room";
+
+    // Tính rating từ reviews
+    const rating = calculateRating(apiRoom.reviews);
 
     return {
       id: apiRoom.id,
@@ -95,12 +108,14 @@ const RoomDetail = () => {
       description: apiRoom.description || "No description available.",
       images: roomImages,
       location: apiRoom.location || "Location not specified",
-      rating: calculateRating(apiRoom.reviews),
-      amenities: mappedAmenities,
-      roomTypes: apiRoom.type ? [apiRoom.type] : ["Standard Room"],
+      rating: rating,
+      amenities: apiRoom.amenities || [],
+      roomType: roomType,
       capacity: apiRoom.capacity || 2,
       isAvailable: apiRoom.isAvailable !== false,
       reviews: apiRoom.reviews || [],
+      createdAt: apiRoom.createdAt,
+      updatedAt: apiRoom.updatedAt
     };
   };
 
@@ -109,9 +124,10 @@ const RoomDetail = () => {
 
     const total = reviews.reduce(
       (sum, review) => sum + (review.rating || 0),
-      0,
+      0
     );
-    return Math.round((total / reviews.length) * 10) / 10;
+    const average = total / reviews.length;
+    return Math.round(average * 10) / 10; // Làm tròn đến 1 chữ số thập phân
   };
 
   useEffect(() => {
@@ -119,16 +135,21 @@ const RoomDetail = () => {
       try {
         setLoading(true);
         const roomData = await roomService.getRoomById(id);
-        console.log(roomData);
+        console.log("Fetched room data:", roomData);
+        
         const mappedRoom = mapRoomData(roomData);
+        console.log("Mapped room data:", mappedRoom);
+        
         setRoom(mappedRoom);
 
+        // Set main image
         if (mappedRoom.images && mappedRoom.images.length > 0) {
           setMainImage(mappedRoom.images[0]);
         } else {
           setMainImage(defaultImages[0]);
         }
 
+        // Set default dates
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         setCheckInDate(tomorrow.toISOString().split("T")[0]);
@@ -160,9 +181,7 @@ const RoomDetail = () => {
     if (!room) return;
 
     if (guests > room.capacity) {
-      toast.loading(
-        `This room can only accommodate up to ${room.capacity} guests.`,
-      );
+      toast.error(`This room can only accommodate up to ${room.capacity} guests.`);
       return;
     }
 
@@ -188,6 +207,7 @@ const RoomDetail = () => {
       const userId = getCurrentUserId();
       if (!userId) {
         toast.error("Please login to book a room.");
+        navigate("/login");
         return;
       }
 
@@ -257,6 +277,7 @@ const RoomDetail = () => {
     const timeDiff = end - start;
     return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
   };
+
   const nights = calculateNights();
   const totalPrice = room ? room.price * nights : 0;
 
@@ -317,7 +338,7 @@ const RoomDetail = () => {
         <h1 className="text-3xl md:text-4xl font-semibold">
           {room.name}{" "}
           <span className="font-thin text-sm">
-            ({room.roomTypes.join(", ")})
+            ({room.roomType})
           </span>
         </h1>
         <p className="font-extrabold text-xs py-1.5 px-3 text-white bg-orange-500 rounded-full">
@@ -327,7 +348,7 @@ const RoomDetail = () => {
 
       <div className="flex items-center gap-1 mt-2">
         <StarRating rating={room.rating} size={20} />
-        <p className="ml-2">{room.reviews.length}+ Reviews</p>
+        <p className="ml-2">{room.reviews.length} Review{room.reviews.length !== 1 ? 's' : ''}</p>
       </div>
 
       <div className="flex items-center gap-1 mt-2 text-gray-500">
@@ -337,7 +358,7 @@ const RoomDetail = () => {
 
       <div className="mt-2 text-gray-600">
         <FaUser className="inline mr-1" />
-        Up to {room.capacity} guests
+        Up to {room.capacity} guest{room.capacity !== 1 ? 's' : ''}
       </div>
 
       <div className="flex flex-col lg:flex-row items-center gap-4 mt-6">
@@ -346,6 +367,9 @@ const RoomDetail = () => {
             src={mainImage}
             alt="room-image"
             className="w-full h-80 lg:h-96 rounded-xl shadow-lg object-cover"
+            onError={(e) => {
+              e.target.src = defaultImages[0];
+            }}
           />
         </div>
 
@@ -383,19 +407,56 @@ const RoomDetail = () => {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-light leading-tight text-gray-800">
             {room.description}
           </h1>
-          <div className="flex flex-wrap gap-3 p-4 rounded-xl bg-gray-50 shadow-sm">
-            {room.amenities.map((amenity, index) => (
-              <span
-                key={index}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <span className="text-orange-500">
-                  {amenitiesIcons[amenity] || <FaWifi />}
-                </span>
-                {amenity}
-              </span>
-            ))}
-          </div>
+          
+          {/* Amenities Section */}
+          {room.amenities && room.amenities.length > 0 && (
+            <div className="p-4 rounded-xl bg-gray-50 shadow-sm">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Amenities</h3>
+              <div className="flex flex-wrap gap-3">
+                {room.amenities.map((amenity, index) => (
+                  <span
+                    key={index}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                  >
+                    <span className="text-orange-500">
+                      {amenitiesIcons[amenity] || <FaWifi />}
+                    </span>
+                    {amenitiesLabels[amenity] || amenity}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reviews Section */}
+          {room.reviews && room.reviews.length > 0 && (
+            <div className="p-4 rounded-xl bg-gray-50 shadow-sm">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">
+                Reviews ({room.reviews.length})
+              </h3>
+              <div className="space-y-4">
+                {room.reviews.map((review, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                          {review.user?.name?.charAt(0) || 'U'}
+                        </div>
+                        <span className="font-medium">
+                          {review.user?.name || 'Unknown User'}
+                        </span>
+                      </div>
+                      <StarRating rating={review.rating} size={16} />
+                    </div>
+                    <p className="text-gray-600 text-sm mb-2">{review.comment}</p>
+                    <p className="text-gray-400 text-xs">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col items-end space-y-2">
@@ -406,9 +467,10 @@ const RoomDetail = () => {
         </div>
       </div>
 
+      {/* Booking Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-6xl"
+        className="bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-full"
       >
         <h2 className="text-xl font-semibold mb-6 text-gray-800">
           Book Your Stay
@@ -484,7 +546,7 @@ const RoomDetail = () => {
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Maximum: {room.capacity} guests
+              Maximum: {room.capacity} guest{room.capacity !== 1 ? 's' : ''}
             </p>
           </div>
 
@@ -528,35 +590,6 @@ const RoomDetail = () => {
           </div>
         )}
       </form>
-
-      <div className="flex flex-col items-start gap-4 mt-20">
-        <div className="flex gap-4">
-          <img
-            src={
-              room.images && room.images.length > 0
-                ? room.images[0]
-                : defaultImages[0]
-            }
-            alt="host"
-            className="h-14 w-14 md:h-18 md:w-18 rounded-full object-cover"
-            onError={(e) => {
-              e.target.src = defaultImages[0];
-            }}
-          />
-          <div>
-            <p className="text-lg md:text-xl">Hosted by {room.name}</p>
-            <div className="flex items-center mt-1">
-              <StarRating rating={room.rating} size={16} />
-              <span className="ml-2 text-sm text-gray-500">
-                {room.reviews.length}+ Reviews
-              </span>
-            </div>
-          </div>
-        </div>
-        <button className="px-6 py-2.5 mt-4 rounded text-white bg-blue-500 hover:bg-blue-600 active:scale-95 transition-all cursor-pointer">
-          Contact Now
-        </button>
-      </div>
     </div>
   );
 };

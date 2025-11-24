@@ -15,6 +15,10 @@ import SignUpPage from "./pages/SignUp";
 import { AuthProvider } from "./context/AuthProvider";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import UserManagement from "../src/pages/HotelOwner/UserManagement";
+import { AdminProtectedRoute } from "./components/auth/AdminProtectedRoute";
+import Profile from "./pages/Profile";
+import { EditRoom } from "./pages/HotelOwner/EditRoom";
+import ReviewPage from "./pages/Review";
 function App() {
   const isOwnerPath = useLocation().pathname.includes("owner");
   return (
@@ -36,55 +40,61 @@ function App() {
                 </ProtectedRoute>
               }
             />
+<Route
+              path="/review/:id"
+              element={
+                <ProtectedRoute>
+                <ReviewPage/>
+                </ProtectedRoute>
+              }
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUpPage />} />
-            {/*  */}
+            <Route path="/profile" element={<ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>} />
             <Route
               path="/owner"
               element={
-                <ProtectedRoute>
+                <AdminProtectedRoute>
                   <Layout />
-                </ProtectedRoute>
+                </AdminProtectedRoute>
               }
             >
               <Route
                 index
                 element={
-                  <ProtectedRoute>
-                    <Dashboard />{" "}
-                  </ProtectedRoute>
+                    <Dashboard />
                 }
               />
               <Route
                 path="add-room"
                 element={
-                  <ProtectedRoute>
-                    <AddRoom />{" "}
-                  </ProtectedRoute>
+                    <AddRoom />
                 }
               />
               <Route
                 path="list-room"
                 element={
-                  <ProtectedRoute>
-                    <ListRoom />{" "}
-                  </ProtectedRoute>
+                    <ListRoom />
+                }
+              />
+              <Route
+                path="rooms/edit/:id"
+                element={
+                    <EditRoom />
                 }
               />
               <Route
                 path="order"
                 element={
-                  <ProtectedRoute>
-                    <Order />{" "}
-                  </ProtectedRoute>
+                    <Order />
                 }
               />
               <Route
                 path="user"
                 element={
-                  <ProtectedRoute>
-                    <UserManagement />{" "}
-                  </ProtectedRoute>
+                    <UserManagement />
                 }
               />
             </Route>

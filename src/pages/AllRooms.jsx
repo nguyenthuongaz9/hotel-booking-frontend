@@ -63,12 +63,10 @@ const AllRooms = () => {
   };
 
   const roomTypes = [
-    "Single Bed",
-    "Double Bed",
+    "Single",
+    "Double",
     "Suite",
-    "Deluxe Room",
-    "Family Room",
-    "King Room",
+    "Family",
   ];
   const priceRanges = [
     "$50 - $100",

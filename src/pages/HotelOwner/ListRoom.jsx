@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { roomService } from "../../services/RoomService";
+import { useNavigate } from "react-router-dom"; 
 
 const ListRoom = () => {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,6 +49,10 @@ const ListRoom = () => {
 
     return () => clearTimeout(timer);
   }, [searchTerm, sortBy, sortOrder]);
+
+  const handleEditRoom = (roomId) => {
+    navigate(`/owner/rooms/edit/${roomId}`);
+  };
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -302,6 +308,27 @@ const ListRoom = () => {
                     {room.isAvailable ? "Có sẵn" : "Đã thuê"}
                   </span>
                 </div>
+                
+                {/* Thêm nút chỉnh sửa ở góc trên bên trái */}
+                <button
+                  onClick={() => handleEditRoom(room.id)}
+                  className="absolute top-3 left-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200 group"
+                  title="Chỉnh sửa phòng"
+                >
+                  <svg 
+                    className="w-4 h-4 text-gray-600 group-hover:text-blue-600" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
+                    />
+                  </svg>
+                </button>
               </div>
 
               <div className="p-4">
