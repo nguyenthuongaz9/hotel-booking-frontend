@@ -127,7 +127,7 @@ const RoomDetail = () => {
       0
     );
     const average = total / reviews.length;
-    return Math.round(average * 10) / 10; // Làm tròn đến 1 chữ số thập phân
+    return Math.round(average * 10) / 10; 
   };
 
   useEffect(() => {

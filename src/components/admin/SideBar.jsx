@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HiHome, HiMenu, HiPlusCircle, HiViewList, HiX } from "react-icons/hi";
+import { HiHome, HiMenu, HiPlusCircle, HiShoppingCart, HiUserGroup, HiViewList, HiX } from "react-icons/hi";
 import { NavLink } from "react-router-dom";
 
 const SideBar = () => {
@@ -20,12 +20,12 @@ const SideBar = () => {
     {
       name: "Orders",
       path: "/owner/order",
-      icon: <HiViewList className="text-xl" />,
+      icon: <HiShoppingCart className="text-xl" />,
     },
     {
       name: "User",
       path: "/owner/user",
-      icon: <HiViewList className="text-xl" />,
+      icon: <HiUserGroup className="text-xl" />,
     },
   ];
 

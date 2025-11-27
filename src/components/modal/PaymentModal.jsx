@@ -306,7 +306,7 @@ const PaymentModal = ({ order, onSuccess, onClose }) => {
             <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
               <span className="text-gray-700">Total Amount:</span>
               <span className="text-blue-600">
-                {order.totalPrice.toLocaleString("vi-VN")}₫
+                {order.totalPrice} $
               </span>
             </div>
           </div>
