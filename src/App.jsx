@@ -19,6 +19,7 @@ import { AdminProtectedRoute } from "./components/auth/AdminProtectedRoute";
 import Profile from "./pages/Profile";
 import { EditRoom } from "./pages/HotelOwner/EditRoom";
 import ReviewPage from "./pages/Review";
+import About from "./pages/About";
 function App() {
   const isOwnerPath = useLocation().pathname.includes("owner");
   return (
@@ -31,7 +32,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/rooms" element={<AllRooms />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
-
+            <Route path="/about" element={<About />} />
             <Route
               path="/my-bookings"
               element={
@@ -40,11 +41,11 @@ function App() {
                 </ProtectedRoute>
               }
             />
-<Route
+            <Route
               path="/review/:id"
               element={
                 <ProtectedRoute>
-                <ReviewPage/>
+                  <ReviewPage />
                 </ProtectedRoute>
               }
             />
@@ -64,37 +65,37 @@ function App() {
               <Route
                 index
                 element={
-                    <Dashboard />
+                  <Dashboard />
                 }
               />
               <Route
                 path="add-room"
                 element={
-                    <AddRoom />
+                  <AddRoom />
                 }
               />
               <Route
                 path="list-room"
                 element={
-                    <ListRoom />
+                  <ListRoom />
                 }
               />
               <Route
                 path="rooms/edit/:id"
                 element={
-                    <EditRoom />
+                  <EditRoom />
                 }
               />
               <Route
                 path="order"
                 element={
-                    <Order />
+                  <Order />
                 }
               />
               <Route
                 path="user"
                 element={
-                    <UserManagement />
+                  <UserManagement />
                 }
               />
             </Route>

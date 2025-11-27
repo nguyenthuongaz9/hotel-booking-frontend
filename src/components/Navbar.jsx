@@ -12,7 +12,7 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "Hotels", path: "/rooms" },
     { name: "My bookings", path: "/my-bookings" },
-    { name: "About", path: "/" },
+    { name: "About", path: "/about" },
   ];
 
   const { user } = useAuth() || {};
