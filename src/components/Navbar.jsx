@@ -14,7 +14,6 @@ const Navbar = () => {
     { name: "My bookings", path: "/my-bookings" },
     { name: "About", path: "/about" },
   ];
-
   const { user } = useAuth() || {};
 
   const [isScrolled, setIsScrolled] = useState(false);
