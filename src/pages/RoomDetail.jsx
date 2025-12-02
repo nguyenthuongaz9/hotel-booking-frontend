@@ -85,7 +85,6 @@ const RoomDetail = () => {
   const mapRoomData = (apiRoom) => {
     console.log("Raw API room data:", apiRoom);
 
-    // Xử lý images
     const roomImages = apiRoom.images && apiRoom.images.length > 0
       ? apiRoom.images.map((img) => {
           const imageUrl = img.image 
@@ -95,10 +94,8 @@ const RoomDetail = () => {
         })
       : defaultImages;
 
-    // Xử lý room type
     const roomType = apiRoom.type ? roomTypeLabels[apiRoom.type] || apiRoom.type : "Standard Room";
 
-    // Tính rating từ reviews
     const rating = calculateRating(apiRoom.reviews);
 
     return {
@@ -142,14 +139,12 @@ const RoomDetail = () => {
         
         setRoom(mappedRoom);
 
-        // Set main image
         if (mappedRoom.images && mappedRoom.images.length > 0) {
           setMainImage(mappedRoom.images[0]);
         } else {
           setMainImage(defaultImages[0]);
         }
 
-        // Set default dates
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         setCheckInDate(tomorrow.toISOString().split("T")[0]);

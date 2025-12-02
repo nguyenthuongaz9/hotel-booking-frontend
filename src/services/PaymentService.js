@@ -24,47 +24,9 @@ export const paymentService = {
     }
   },
 
-  async confirmPayment(paymentIntentId) {
-    try {
-      const response = await axiosInstance.post(
-        `/payment/confirm/${paymentIntentId}`,
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to confirm payment: " + error.message);
-    }
-  },
+  
 
-  async getPaymentStatus(orderId) {
-    try {
-      const response = await axiosInstance.get(`/payment/status/${orderId}`);
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to get payment status: " + error.message);
-    }
-  },
-
-  async handleWebhook(payload) {
-    try {
-      const response = await axiosInstance.post(`/payment/webhook`, payload);
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to handle webhook: " + error.message);
-    }
-  },
-
-  async createMomoPayment(amount, orderId, orderInfo = "") {
-    try {
-      const response = await axiosInstance.post(`/payment/momo/create`, {
-        amount: amount,
-        orderId: orderId,
-        orderInfo: orderInfo || `Payment for order #${orderId}`,
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to create Momo payment: " + error.message);
-    }
-  },
+  
 };
 
 export default paymentService;
